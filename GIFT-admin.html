@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GIFT 管理画面 - studio nonfiction</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Noto+Serif+JP:wght@300;400&display=swap');
+
+  :root {
+    --bg: #0f0d0b;
+    --surface: #1a1714;
+    --surface2: #222019;
+    --border: #2e2a26;
+    --accent: #9a7a5a;
+    --accent-dim: rgba(154,122,90,0.12);
+    --text: #e8e2d9;
+    --muted: #7a6a5a;
+    --success: #5a9a7a;
+    --green: #06c755;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-weight: 300;
+    font-size: 14px;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 28px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 10;
+  }
+  .header-left { display: flex; align-items: center; gap: 14px; }
+  .header-logo { font-size: 11px; letter-spacing: 0.3em; color: var(--accent); text-transform: uppercase; }
+  .header-sep { width: 1px; height: 20px; background: var(--border); }
+  .header-title { font-size: 14px; color: var(--text); }
+  .preview-btn {
+    display: flex; align-items: center; gap: 6px;
+    padding: 8px 16px;
+    background: var(--accent); color: #fff;
+    border: none; border-radius: 6px;
+    font-size: 12px; cursor: pointer; font-family: inherit;
+    transition: opacity 0.2s;
+  }
+  .preview-btn:hover { opacity: 0.85; }
+
+  /* MAIN */
+  .main { max-width: 680px; margin: 0 auto; padding: 32px 20px 80px; }
+
+  /* CARD */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .card-title {
+    font-size: 11px; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--accent);
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* FORM */
+  .form-group { margin-bottom: 16px; }
+  .form-label {
+    display: block; font-size: 11px;
+    color: var(--muted); margin-bottom: 7px;
+    text-transform: uppercase; letter-spacing: 0.1em;
+  }
+  .form-input, .form-select, .form-textarea {
+    width: 100%; padding: 11px 14px;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text);
+    font-size: 14px; font-family: inherit;
+    outline: none; transition: border-color 0.15s;
+  }
+  .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); }
+  .form-select { appearance: none; }
+  .form-textarea { resize: vertical; min-height: 100px; line-height: 1.8; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-hint { font-size: 11px; color: var(--muted); margin-top: 5px; }
+
+  /* PRESET TAGS */
+  .preset-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .preset-tag {
+    padding: 4px 12px; border: 1px solid var(--border);
+    border-radius: 20px; font-size: 11px; color: var(--muted);
+    background: transparent; cursor: pointer; font-family: inherit;
+    transition: all 0.15s;
+  }
+  .preset-tag:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* DRIVE LINK */
+  .drive-input-wrap { position: relative; }
+  .drive-input-wrap .drive-icon {
+    position: absolute; left: 12px; top: 50%;
+    transform: translateY(-50%); font-size: 16px;
+  }
+  .drive-input-wrap .form-input { padding-left: 38px; }
+
+  /* GENERATE BTN */
+  .generate-btn {
+    width: 100%; padding: 16px;
+    background: var(--accent); color: #fff;
+    border: none; border-radius: 10px;
+    font-size: 15px; font-family: inherit; font-weight: 500;
+    cursor: pointer; letter-spacing: 0.05em;
+    transition: opacity 0.2s;
+    margin-top: 8px;
+  }
+  .generate-btn:hover { opacity: 0.85; }
+
+  /* OUTPUT */
+  .output-card {
+    background: var(--surface2);
+    border: 1px solid var(--accent);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+    display: none;
+  }
+  .output-card.show { display: block; }
+  .output-title {
+    font-size: 11px; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--accent);
+    margin-bottom: 16px;
+  }
+
+  /* LINE MSG */
+  .line-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    font-size: 13px; line-height: 1.9;
+    color: var(--text);
+    white-space: pre-wrap;
+    margin-bottom: 12px;
+  }
+  .line-copy {
+    width: 100%; padding: 12px;
+    background: var(--green); color: #fff;
+    border: none; border-radius: 8px;
+    font-size: 14px; font-family: inherit;
+    cursor: pointer;
+  }
+
+  /* CHECKLIST */
+  .checklist { list-style: none; }
+  .checklist li {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px; color: var(--muted);
+  }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist li input[type=checkbox] {
+    width: 17px; height: 17px;
+    accent-color: var(--accent); cursor: pointer; flex-shrink: 0;
+  }
+  .checklist li input:checked + span { color: var(--text); text-decoration: line-through; opacity: 0.5; }
+
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(8px);
+    background: var(--surface); border: 1px solid var(--accent);
+    color: var(--accent); padding: 10px 24px;
+    border-radius: 8px; font-size: 13px; z-index: 999;
+    opacity: 0; transition: all 0.25s; pointer-events: none;
+    white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="header-logo">GIFT</div>
+    <div class="header-sep"></div>
+    <div class="header-title">studio nonfiction 管理画面</div>
+  </div>
+  <button class="preview-btn" onclick="openPreview()">👁 お客様プレビュー</button>
+</div>
+
+<div class="main">
+
+  <!-- 案件情報 -->
+  <div class="card">
+    <div class="card-title">案件情報</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">お客様名 *</label>
+        <input class="form-input" id="clientName" placeholder="山田 花子" oninput="updatePreview()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">撮影日 *</label>
+        <input class="form-input" id="shootDate" type="date" oninput="updatePreview()">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">撮影種別</label>
+        <select class="form-select" id="shootType" onchange="updatePreview()">
+          <option value="七五三">七五三</option>
+          <option value="成人式">成人式</option>
+          <option value="家族写真">家族写真</option>
+          <option value="マタニティ">マタニティ</option>
+          <option value="バースデー">バースデー</option>
+          <option value="ニューボーン">ニューボーン</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">写真枚数</label>
+        <input class="form-input" id="photoCount" type="number" placeholder="42" min="0" oninput="updatePreview()">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">リンク有効期限</label>
+      <input class="form-input" id="expireDate" type="date" oninput="updatePreview()">
+      <div class="form-hint">納品日から2週間が目安です</div>
+    </div>
+  </div>
+
+  <!-- Googleドライブリンク -->
+  <div class="card">
+    <div class="card-title">GoogleドライブURL</div>
+    <div class="form-group">
+      <label class="form-label">共有リンク *</label>
+      <div class="drive-input-wrap">
+        <span class="drive-icon">📁</span>
+        <input class="form-input" id="driveUrl" placeholder="https://drive.google.com/drive/folders/..." oninput="updatePreview()">
+      </div>
+      <div class="form-hint">Googleドライブのフォルダを「リンクを知っている全員・閲覧者」で共有してURLをコピー</div>
+    </div>
+  </div>
+
+  <!-- お礼メッセージ -->
+  <div class="card">
+    <div class="card-title">お礼メッセージ</div>
+    <div class="preset-tags">
+      <button class="preset-tag" onclick="setPreset('shichi')">七五三</button>
+      <button class="preset-tag" onclick="setPreset('seijin')">成人式</button>
+      <button class="preset-tag" onclick="setPreset('family')">家族写真</button>
+      <button class="preset-tag" onclick="setPreset('baby')">ニューボーン</button>
+      <button class="preset-tag" onclick="setPreset('birthday')">バースデー</button>
+      <button class="preset-tag" onclick="setPreset('maternity')">マタニティ</button>
+    </div>
+    <div class="form-group">
+      <textarea class="form-textarea" id="thankMsg" oninput="updatePreview()" placeholder="お客様へのお礼メッセージを入力...">この度はstudio nonfictionでの撮影にお越しいただき、誠にありがとうございました。大切な瞬間をお手伝いできたこと、スタッフ一同、心より嬉しく思っております。またいつでもお気軽にお越しください。</textarea>
+    </div>
+  </div>
+
+  <!-- 生成ボタン -->
+  <button class="generate-btn" onclick="generate()">🎁 GIFTを作成してLINEメッセージを確認</button>
+
+  <!-- 出力エリア -->
+  <div class="output-card" id="outputCard">
+    <div class="output-title">📬 公式LINEで送るメッセージ</div>
+    <div class="line-box" id="lineMsg"></div>
+    <button class="line-copy" onclick="copyLine()">📋 コピーしてLINEに貼る</button>
+  </div>
+
+  <!-- チェックリスト -->
+  <div class="card">
+    <div class="card-title">納品チェックリスト</div>
+    <ul class="checklist">
+      <li><input type="checkbox" id="c1"><span>写真をGoogleドライブにアップ完了</span></li>
+      <li><input type="checkbox" id="c2"><span>共有設定を「閲覧者・全員」に設定</span></li>
+      <li><input type="checkbox" id="c3"><span>上記フォームの入力完了</span></li>
+      <li><input type="checkbox" id="c4"><span>お礼メッセージを案件用に変更</span></li>
+      <li><input type="checkbox" id="c5"><span>公式LINEでメッセージ送信済み</span></li>
+      <li><input type="checkbox" id="c6"><span>お客様のDLを確認</span></li>
+      <li><input type="checkbox" id="c7"><span>ドライブからフォルダを削除</span></li>
+    </ul>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const presets = {
+  shichi: 'この度はstudio nonfictionでの七五三撮影にお越しいただき、誠にありがとうございました。お子様の晴れ姿を一緒に記録できたこと、スタッフ一同とても嬉しく思っております。これからの健やかなご成長を心よりお祈り申し上げます。',
+  seijin: 'この度はstudio nonfictionでの成人式撮影にお越しいただき、誠にありがとうございました。美しい晴れ姿を記録できたこと、大変光栄に思っております。新しいステージでのご活躍を、スタッフ一同心よりお祈り申し上げます。',
+  family: 'この度はstudio nonfictionでの家族写真撮影にお越しいただき、誠にありがとうございました。皆様の素敵な笑顔を記録できたこと、スタッフ一同とても嬉しく思っております。またいつでもお気軽にお越しください。',
+  baby:   'この度はstudio nonfictionでのニューボーン撮影にお越しいただき、誠にありがとうございました。生まれたばかりの大切な瞬間をお手伝いできたこと、スタッフ一同心より光栄に思っております。赤ちゃんの健やかなご成長をお祈り申し上げます。',
+  birthday: 'この度はstudio nonfictionでのバースデー撮影にお越しいただき、誠にありがとうございました。大切なお誕生日の記念を一緒に残せたこと、スタッフ一同とても嬉しく思っております。これからも素敵な毎日が続きますよう、心よりお祈り申し上げます。',
+  maternity: 'この度はstudio nonfictionでのマタニティ撮影にお越しいただき、誠にありがとうございました。新しい命を宿した美しいお姿を記録できたこと、大変光栄に思っております。ご出産を心よりお祝い申し上げます。',
+};
+
+function setPreset(key) {
+  document.getElementById('thankMsg').value = presets[key];
+  updatePreview();
+}
+
+function fmtDate(val) {
+  if (!val) return '';
+  const d = new Date(val);
+  return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
+}
+
+function updatePreview() {
+  // 有効期限の自動計算（撮影日+14日）
+  const shoot = document.getElementById('shootDate').value;
+  const expire = document.getElementById('expireDate');
+  if (shoot && !expire.value) {
+    const d = new Date(shoot);
+    d.setDate(d.getDate() + 14);
+    expire.value = d.toISOString().slice(0,10);
+  }
+}
+
+function generate() {
+  const name = document.getElementById('clientName').value.trim();
+  const date = document.getElementById('shootDate').value;
+  const url  = document.getElementById('driveUrl').value.trim();
+  const expire = document.getElementById('expireDate').value;
+
+  if (!name || !date || !url) {
+    showToast('⚠️ お客様名・撮影日・ドライブURLを入力してください');
+    return;
+  }
+
+  const expStr = expire ? fmtDate(expire) : '2週間後';
+  const msg = `${name} 様\n\nこの度はstudio nonfictionでの撮影、誠にありがとうございました。\n\n大切なお写真の準備ができましたのでお知らせいたします。\n\n📷 お写真を受け取る\n${url}\n\nリンクの有効期限は ${expStr} となっております。\nお早めにダウンロードをお願いいたします。\n\nご不明な点はお気軽にご連絡ください。\nstudio nonfiction`;
+
+  document.getElementById('lineMsg').textContent = msg;
+  document.getElementById('outputCard').classList.add('show');
+  document.getElementById('outputCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  showToast('✅ LINEメッセージを作成しました');
+}
+
+function copyLine() {
+  const text = document.getElementById('lineMsg').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('📋 コピーしました！LINEに貼り付けてください');
+  });
+}
+
+function openPreview() {
+  showToast('👁 GIFT-client.html をブラウザで開いてください');
+}
+
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// 初期値：今日の日付
+document.getElementById('shootDate').value = new Date().toISOString().slice(0,10);
+updatePreview();
+</script>
+</body>
+</html>
